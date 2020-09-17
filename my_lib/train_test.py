@@ -76,8 +76,6 @@ def create_checkpoint(model, model_ema, optimizer, is_best, is_ema_best,
     else:
         model_state = model.state_dict()
 
-    from distiller import Distiller
-
     if model_ema is not None: 
         if isinstance(model_ema, torch.nn.DataParallel):
             model_ema_state = model_ema.module.state_dict()
@@ -87,12 +85,7 @@ def create_checkpoint(model, model_ema, optimizer, is_best, is_ema_best,
         model_ema_state = None
 
     if is_best:
-        if isinstance(model, Distiller):
-            torch.save(model.s_net.state_dict(), bestname)
-        elif isinstance(model, torch.nn.DataParallel) and isinstance(model.module, Distiller):
-            torch.save(model.module.s_net.state_dict(), bestname)
-        else:
-            torch.save(model_state, bestname)
+        torch.save(model_state, bestname)
 
     if is_ema_best:        
         torch.save(model_ema_state, bestname)
