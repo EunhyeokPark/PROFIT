@@ -176,6 +176,7 @@ def train_epochs(optimizer, warmup_len, max_epochs, prefix):
         best_acc = max(best_acc, acc_base, acc_ema)        
         create_checkpoint(model, model_ema, optimizer,
                           is_best, is_ema_best, best_acc, epoch, ckpt_root, 1, prefix)    
+        scheduler.step()  
     return best_acc
 
 
