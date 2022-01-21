@@ -189,7 +189,7 @@ if args.teacher != "none": # full-precision fine-tuning with teacher-student
     print("==> Full precision fine-tuning")
     params = categorize_param(model)
     optimizer = get_optimizer(params, train_quant=True, train_weight=True, train_bnbias=True)    
-    train_epochs(optimizer, args.warmup, args.ft_epoch, prefix)
+    best_acc = train_epochs(optimizer, args.warmup, args.ft_epoch, prefix)
 
 
 # progressive activation quantization 
@@ -214,16 +214,16 @@ for a_bit in args.a_bit:
         print("==> BN stabilize")
         params = categorize_param(model)
         optimizer = get_optimizer(params, train_quant=True, train_weight=False, train_bnbias=True) 
-        train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn")
+        best_acc = train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn")
 
     print("==> Fine-tuning")
     optimizer = get_optimizer(params, train_quant=True, train_weight=True, train_bnbias=True) 
-    train_epochs(optimizer, args.warmup, args.ft_epoch, prefix)
+    best_acc = train_epochs(optimizer, args.warmup, args.ft_epoch, prefix)
 
     if args.stabilize:
         print("==> BN stabilize 2")
         optimizer = get_optimizer(params, train_quant=True, train_weight=False, train_bnbias=True) 
-        train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn2")
+        best_acc = train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn2")
 
 
 # progressive weight quantization
@@ -250,7 +250,7 @@ for w_bit in args.w_bit:
         print("==> BN stabilize")
         params = categorize_param(model)
         optimizer = get_optimizer(params, train_quant=True, train_weight=False, train_bnbias=True) 
-        train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn")
+        best_acc = train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn")
 
 
     if w_bit in args.w_profit:    # PROFIT training
@@ -291,25 +291,25 @@ for w_bit in args.w_bit:
 
         params = categorize_param(model)
         optimizer = get_optimizer(params, train_quant=True, train_weight=True, train_bnbias=True) 
-        train_epochs(optimizer, args.warmup, args.ft_epoch, prefix + "_ft1")
+        best_acc = train_epochs(optimizer, args.warmup, args.ft_epoch, prefix + "_ft1")
 
         params = categorize_param(model, skip_list)
         optimizer = get_optimizer(params, train_quant=True, train_weight=True, train_bnbias=True) 
-        train_epochs(optimizer, args.warmup, args.ft_epoch, prefix + "_ft2")
+        best_acc = train_epochs(optimizer, args.warmup, args.ft_epoch, prefix + "_ft2")
 
         params = categorize_param(model, skip_list + skip_list_next)
         optimizer = get_optimizer(params, train_quant=True, train_weight=True, train_bnbias=True) 
-        train_epochs(optimizer, args.warmup, args.ft_epoch, prefix + "_ft3")
+        best_acc = train_epochs(optimizer, args.warmup, args.ft_epoch, prefix + "_ft3")
 
     else:                     
         print("==> Fine-tuning")
         params = categorize_param(model)
         optimizer = get_optimizer(params, train_quant=True, train_weight=True, train_bnbias=True) 
-        train_epochs(optimizer, args.warmup, args.ft_epoch, prefix)
+        best_acc = train_epochs(optimizer, args.warmup, args.ft_epoch, prefix)
 
     if args.stabilize:
         print("==> BN stabilize 2")
         optimizer = get_optimizer(params, train_quant=True, train_weight=False, train_bnbias=True) 
-        train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn2")
+        best_acc = train_epochs(optimizer, 0, args.bn_epoch, prefix + "_bn2")
 
 print("==> Finish training.. best accuracy is {}".format(best_acc))
